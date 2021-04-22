@@ -8,10 +8,10 @@ sys.path.insert(
 
 from sourcecred import SourceCred
 
-sc = SourceCred()
+sc = SourceCred(github_token=os.getenv("BADGER_SOURCECRED_REPO_TOKEN"), repo="btcookies/SourceCred")
 
 
-def test_is_discord_alias_action():
+def test_is_action_discord_alias():
 
     test_discord_action = {
         "alias": {
@@ -33,15 +33,22 @@ def test_is_discord_alias_action():
     }
     test_empty = {}
 
-    assert sc.is_discord_alias_action(test_discord_action) == True
-    assert sc.is_discord_alias_action(test_non_discord_action) == False
-    assert sc.is_discord_alias_action(test_empty) == False
+    assert sc.is_action_discord_alias(test_discord_action) == True
+    assert sc.is_action_discord_alias(test_non_discord_action) == False
+    assert sc.is_action_discord_alias(test_empty) == False
 
 
-def test_get_user_identity_id():
+def test_get_discord_user_identity_id():
 
     test_discord_id = "653638788026990593"
     test_invalid_discord_id = "12345"
 
-    assert sc.get_user_identity_id(test_discord_id) == "7aGWmcJLo8Ak6EGiPYLdRw"
-    assert sc.get_user_identity_id(test_invalid_discord_id) == None
+    assert sc.get_discord_user_identity_id(test_discord_id) == "Fl4S7yjQFE5LXJKCM3UD3w"
+    assert sc.get_discord_user_identity_id(test_invalid_discord_id) == None
+
+def test_update_ledger(monkeypatch):
+
+    activations = [{"action":{"identityId":"Qdv012dJYxqbRPwSn8VQFg","type":"TOGGLE_ACTIVATION"},"ledgerTimestamp":1617130396519,"uuid":"xfabphNtX8iat4dPGxYIpQ","version":"1"},
+    {"action":{"identityId":"Qdv012dJYxqbRPwSn8VQFg","type":"TOGGLE_ACTIVATION"},"ledgerTimestamp":1617130396519,"uuid":"xfabphNtX8iat4dPGxYIpQ","version":"1"}]
+
+    sc.update_ledger(activations)
