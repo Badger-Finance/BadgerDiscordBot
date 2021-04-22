@@ -45,7 +45,7 @@ def test_get_discord_user_identity_id():
     test_discord_id = "653638788026990593"
     test_invalid_discord_id = "12345"
 
-    assert sc.get_discord_user_identity_id(test_discord_id) == "Fl4S7yjQFE5LXJKCM3UD3w"
+    assert sc.get_discord_user_identity_id(test_discord_id) == "N7pyNa2bp8DIA0RQYNnrmw"
     assert sc.get_discord_user_identity_id(test_invalid_discord_id) == None
 
 
