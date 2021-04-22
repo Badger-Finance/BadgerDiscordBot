@@ -85,8 +85,6 @@ class SourceCred:
         if len(user_discord_id) != 18:
             return None
 
-        identity_ids = []
-
         for entry in self.ledger:
             action = entry.get("action", {})
 
