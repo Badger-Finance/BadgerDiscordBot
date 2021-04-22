@@ -20,7 +20,9 @@ class SourceCred:
     ):
         self.github_token = github_token
         self.repo = repo
-        self.ledger = self.get_current_ledger(f"https://raw.githubusercontent.com/{repo}/master/data/ledger.json")
+        self.ledger = self.get_current_ledger(
+            f"https://raw.githubusercontent.com/{repo}/master/data/ledger.json"
+        )
         self.logger = logging.getLogger("badger-bot")
 
     def get_current_ledger(self, ledger_url: str) -> list:
@@ -147,20 +149,28 @@ class SourceCred:
         g = Github(self.github_token)
         repo = g.get_repo(self.repo)
 
-        branch = json.loads(requests.get(f'https://api.github.com/repos/{self.repo}/git/ref/heads/master').content)
-        commit_sha = branch.get('object').get('sha')
+        branch = json.loads(
+            requests.get(
+                f"https://api.github.com/repos/{self.repo}/git/ref/heads/master"
+            ).content
+        )
+        commit_sha = branch.get("object").get("sha")
 
-        commit = json.loads(requests.get(f'https://api.github.com/repos/{self.repo}/git/commits/{commit_sha}').content)
-        tree_sha = commit.get('sha')
+        commit = json.loads(
+            requests.get(
+                f"https://api.github.com/repos/{self.repo}/git/commits/{commit_sha}"
+            ).content
+        )
+        tree_sha = commit.get("sha")
         self.logger.info(f"tree_sha {tree_sha} commit {commit}")
-            
+
         ledger_sha = self.get_ledger_sha(tree_sha)
 
         self.logger.info(f"Updating ledger.json with following actions")
         self.logger.info(actions)
 
         response = repo.update_file(
-            'data/ledger.json',
+            "data/ledger.json",
             "update ledger to activate users",
             "\n".join(actions),
             ledger_sha,
@@ -170,11 +180,17 @@ class SourceCred:
         self.logger.info(f"Update response: {response}")
 
     def get_ledger_sha(self, tree_sha) -> str:
-        tree = json.loads(requests.get(f'https://api.github.com/repos/{self.repo}/git/trees/{tree_sha}').content)
-        for subtree in tree.get('tree'):
-            if subtree.get('path') == 'ledger.json':
-                return subtree.get('sha')
-            elif subtree.get('path') == 'data':
-                return self.get_ledger_sha(subtree.get('sha'))
+        tree = json.loads(
+            requests.get(
+                f"https://api.github.com/repos/{self.repo}/git/trees/{tree_sha}"
+            ).content
+        )
+        for subtree in tree.get("tree"):
+            if subtree.get("path") == "ledger.json":
+                return subtree.get("sha")
+            elif subtree.get("path") == "data":
+                return self.get_ledger_sha(subtree.get("sha"))
 
-        raise ValueError(f"Tree with sha {tree_sha} did not contain the ledger.json file")
+        raise ValueError(
+            f"Tree with sha {tree_sha} did not contain the ledger.json file"
+        )

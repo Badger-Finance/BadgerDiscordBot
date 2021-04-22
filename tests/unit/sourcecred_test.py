@@ -8,7 +8,9 @@ sys.path.insert(
 
 from sourcecred import SourceCred
 
-sc = SourceCred(github_token=os.getenv("BADGER_SOURCECRED_REPO_TOKEN"), repo="btcookies/SourceCred")
+sc = SourceCred(
+    github_token=os.getenv("BADGER_SOURCECRED_REPO_TOKEN"), repo="btcookies/SourceCred"
+)
 
 
 def test_is_action_discord_alias():
@@ -46,9 +48,28 @@ def test_get_discord_user_identity_id():
     assert sc.get_discord_user_identity_id(test_discord_id) == "Fl4S7yjQFE5LXJKCM3UD3w"
     assert sc.get_discord_user_identity_id(test_invalid_discord_id) == None
 
+
 def test_update_ledger(monkeypatch):
 
-    activations = [{"action":{"identityId":"Qdv012dJYxqbRPwSn8VQFg","type":"TOGGLE_ACTIVATION"},"ledgerTimestamp":1617130396519,"uuid":"xfabphNtX8iat4dPGxYIpQ","version":"1"},
-    {"action":{"identityId":"Qdv012dJYxqbRPwSn8VQFg","type":"TOGGLE_ACTIVATION"},"ledgerTimestamp":1617130396519,"uuid":"xfabphNtX8iat4dPGxYIpQ","version":"1"}]
+    activations = [
+        {
+            "action": {
+                "identityId": "Qdv012dJYxqbRPwSn8VQFg",
+                "type": "TOGGLE_ACTIVATION",
+            },
+            "ledgerTimestamp": 1617130396519,
+            "uuid": "xfabphNtX8iat4dPGxYIpQ",
+            "version": "1",
+        },
+        {
+            "action": {
+                "identityId": "Qdv012dJYxqbRPwSn8VQFg",
+                "type": "TOGGLE_ACTIVATION",
+            },
+            "ledgerTimestamp": 1617130396519,
+            "uuid": "xfabphNtX8iat4dPGxYIpQ",
+            "version": "1",
+        },
+    ]
 
     sc.update_ledger(activations)
