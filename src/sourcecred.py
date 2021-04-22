@@ -76,6 +76,8 @@ class SourceCred:
 
         self.update_ledger(activation_actions)
 
+        self.mark_users_active(discord_ids)
+
     def get_discord_user_identity_id(self, user_discord_id: str) -> str:
         """
         Gets the sourcecred identityId for the provided discord user and returns None if not found
@@ -133,7 +135,7 @@ class SourceCred:
         """
         activation_action = {
             "action": {"identityId": identity_id, "type": "TOGGLE_ACTIVATION"},
-            "ledgerTimestamp": time.time(),
+            "ledgerTimestamp": round(time.time()*1000),
             "uuid": shortuuid.uuid(),
             "version": "1",
         }
@@ -192,3 +194,12 @@ class SourceCred:
         raise ValueError(
             f"Tree with sha {tree_sha} did not contain the ledger.json file"
         )
+
+    def mark_users_active(self, discord_ids: list):
+        """
+        TODO: implement function to write discord id to db and mark as active
+
+        Args:
+            discord_ids (list): [description]
+        """
+        pass

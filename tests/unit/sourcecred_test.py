@@ -1,6 +1,8 @@
 import os
 import pytest
+import shortuuid
 import sys
+import time
 
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src"))
@@ -57,8 +59,8 @@ def test_update_ledger(monkeypatch):
                 "identityId": "Qdv012dJYxqbRPwSn8VQFg",
                 "type": "TOGGLE_ACTIVATION",
             },
-            "ledgerTimestamp": 1617130396519,
-            "uuid": "xfabphNtX8iat4dPGxYIpQ",
+            "ledgerTimestamp": round(time.time()*1000),
+            "uuid": shortuuid.uuid(),
             "version": "1",
         },
         {
@@ -66,8 +68,8 @@ def test_update_ledger(monkeypatch):
                 "identityId": "Qdv012dJYxqbRPwSn8VQFg",
                 "type": "TOGGLE_ACTIVATION",
             },
-            "ledgerTimestamp": 1617130396519,
-            "uuid": "xfabphNtX8iat4dPGxYIpQ",
+            "ledgerTimestamp": round(time.time()*1000),
+            "uuid": shortuuid.uuid(),
             "version": "1",
         },
     ]
