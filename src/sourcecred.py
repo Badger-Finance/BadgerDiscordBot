@@ -1,3 +1,4 @@
+import base64
 from github import Github
 import json
 import logging
@@ -135,12 +136,28 @@ class SourceCred:
         """
         activation_action = {
             "action": {"identityId": identity_id, "type": "TOGGLE_ACTIVATION"},
-            "ledgerTimestamp": round(time.time()*1000),
-            "uuid": shortuuid.uuid(),
+            "ledgerTimestamp": round(time.time() * 1000),
+            "uuid": self.get_clean_uuid(),
             "version": "1",
         }
 
         return activation_action
+
+    def get_clean_uuid(self):
+
+        uuid = self._get_random_uuid()
+        while not self._is_uuid_clean(uuid):
+            uuid = self._get_random_uuid()
+
+        return uuid[:-2]
+
+    def _get_random_uuid(self):
+        base64_bytes = base64.b64encode(os.urandom(16))
+        return base64_bytes.decode("ascii")
+
+    def _is_uuid_clean(self, uuid: str):
+        _RE_UNCLEAN = "[+/\\-_]|[csfhuit]{2}"
+        return False if re.search(_RE_UNCLEAN, uuid, flags=re.IGNORECASE) else True
 
     def update_ledger(self, activation_actions: list) -> None:
         self.ledger.extend(activation_actions)

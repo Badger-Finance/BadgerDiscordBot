@@ -11,7 +11,8 @@ sys.path.insert(
 from sourcecred import SourceCred
 
 sc = SourceCred(
-    github_token=os.getenv("BADGER_SOURCECRED_REPO_TOKEN"), repo="btcookies/SourceCred"
+    github_token=os.getenv("BADGER_SOURCECRED_TEST_REPO_TOKEN"),
+    repo="btcookies/SourceCred",
 )
 
 
@@ -51,25 +52,32 @@ def test_get_discord_user_identity_id():
     assert sc.get_discord_user_identity_id(test_invalid_discord_id) == None
 
 
+def test_get_clean_uuid():
+
+    assert sc._is_uuid_clean("N7pyNa2bp8DIA0RQYNnrmw")
+    assert sc._is_uuid_clean("N7pyNa2bp8DIA0RQYNnrcc") == False
+    assert sc._is_uuid_clean(sc.get_clean_uuid())
+
+
 def test_update_ledger(monkeypatch):
 
     activations = [
         {
             "action": {
-                "identityId": "Qdv012dJYxqbRPwSn8VQFg",
+                "identityId": "N7pyNa2bp8DIA0RQYNnrmw",
                 "type": "TOGGLE_ACTIVATION",
             },
-            "ledgerTimestamp": round(time.time()*1000),
-            "uuid": shortuuid.uuid(),
+            "ledgerTimestamp": round(time.time() * 1000),
+            "uuid": sc.get_clean_uuid(),
             "version": "1",
         },
         {
             "action": {
-                "identityId": "Qdv012dJYxqbRPwSn8VQFg",
+                "identityId": "N7pyNa2bp8DIA0RQYNnrmw",
                 "type": "TOGGLE_ACTIVATION",
             },
-            "ledgerTimestamp": round(time.time()*1000),
-            "uuid": shortuuid.uuid(),
+            "ledgerTimestamp": round(time.time() * 1000),
+            "uuid": sc.get_clean_uuid(),
             "version": "1",
         },
     ]
