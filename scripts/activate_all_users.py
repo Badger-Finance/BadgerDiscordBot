@@ -2,11 +2,9 @@ import json
 import os
 import sys
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"))
-)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
-from sourcecred import SourceCred
+from sourcecred import SourceCredManager
 
 ALREADY_ACTIVATED = {
     "discord/sarah#0666": True,
@@ -25,7 +23,7 @@ ALREADY_ACTIVATED = {
 }
 
 if __name__ == "__main__":
-    sc = SourceCred(
+    sc = SourceCredManager(
         github_token=os.getenv("BADGER_SOURCECRED_TEST_REPO_TOKEN"),
         repo="btcookies/SourceCred",
     )

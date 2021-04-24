@@ -1,13 +1,9 @@
-import asyncio
-from concurrent.futures import ProcessPoolExecutor
 import discord
 from discord.ext import commands, tasks
-from dotenv import load_dotenv
 import json
 import math
 import os
 import requests
-from threading import Thread
 
 UPDATE_INTERVAL_SECONDS = 45
 
@@ -89,21 +85,3 @@ class PriceBot(discord.Client):
         else:
             return str(abs(int(value)))
 
-
-
-load_dotenv()
-
-loop = asyncio.get_event_loop()
-digg_client = PriceBot(token_ticker="digg", token_symbol="DIGG", discord_id=os.getenv("BOT_ID_DIGG"))
-bdigg_client = PriceBot(token_ticker="badger-sett-digg", token_symbol="BDIGG", discord_id=os.getenv("BOT_ID_BDIGG"))
-badger_client = PriceBot(token_ticker="badger-dao", token_symbol="BADGER", discord_id=os.getenv("BOT_ID_BADGER"))
-bbadger_client = PriceBot(token_ticker="badger-sett-badger", token_symbol="BBADGER", discord_id=os.getenv("BOT_ID_BBADGER"))
-
-
-executor = ProcessPoolExecutor(2)
-loop.create_task(digg_client.start(os.getenv("BOT_TOKEN_DIGG")))
-loop.create_task(bdigg_client.start(os.getenv("BOT_TOKEN_BDIGG")))
-loop.create_task(badger_client.start(os.getenv("BOT_TOKEN_BADGER")))
-loop.create_task(bbadger_client.start(os.getenv("BOT_TOKEN_BBADGER")))
-
-loop.run_forever()
