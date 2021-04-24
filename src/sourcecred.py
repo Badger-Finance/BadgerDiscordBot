@@ -9,7 +9,7 @@ import requests
 import time
 
 
-class SourceCred:
+class SourceCredManager:
     """
     Contains all functions required to manage Badger's sourcecred ecosystem
     """
@@ -143,7 +143,7 @@ class SourceCred:
 
         return activation_action
 
-    def get_clean_uuid(self):
+    def get_clean_uuid(self) -> str:
 
         uuid = self._get_random_uuid()
         while not self._is_uuid_clean(uuid):
@@ -151,11 +151,11 @@ class SourceCred:
 
         return uuid[:-2]
 
-    def _get_random_uuid(self):
+    def _get_random_uuid(self) -> str:
         base64_bytes = base64.b64encode(os.urandom(16))
         return base64_bytes.decode("ascii")
 
-    def _is_uuid_clean(self, uuid: str):
+    def _is_uuid_clean(self, uuid: str) -> bool:
         _RE_UNCLEAN = "[+/\\-_]|[csfhuit]{2}"
         return False if re.search(_RE_UNCLEAN, uuid, flags=re.IGNORECASE) else True
 
@@ -196,7 +196,7 @@ class SourceCred:
 
         self.logger.info(f"Update response: {response}")
 
-    def get_ledger_sha(self, tree_sha) -> str:
+    def get_ledger_sha(self, tree_sha: str) -> str:
         tree = json.loads(
             requests.get(
                 f"https://api.github.com/repos/{self.repo}/git/trees/{tree_sha}"

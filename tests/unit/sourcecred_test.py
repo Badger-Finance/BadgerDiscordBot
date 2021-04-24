@@ -8,9 +8,9 @@ sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src"))
 )
 
-from sourcecred import SourceCred
+from sourcecred import SourceCredManager
 
-sc = SourceCred(
+sc = SourceCredManager(
     github_token=os.getenv("BADGER_SOURCECRED_TEST_REPO_TOKEN"),
     repo="btcookies/SourceCred",
 )
