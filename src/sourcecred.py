@@ -197,6 +197,17 @@ class SourceCredManager:
         self.logger.info(f"Update response: {response}")
 
     def get_ledger_sha(self, tree_sha: str) -> str:
+        """[summary]
+
+        Args:
+            tree_sha (str): sha of tree returned by github data api
+
+        Raises:
+            ValueError: if we can't find ledger.json, throws error
+
+        Returns:
+            str: [description]
+        """
         tree = json.loads(
             requests.get(
                 f"https://api.github.com/repos/{self.repo}/git/trees/{tree_sha}"
