@@ -41,3 +41,7 @@ class DiggBot(PriceBot):
                         nick=f"{self.token_display} $"
                         + str(self.token_data.get("token_price_usd"))
                     )
+
+    @update_price.before_loop
+    async def before_update_price(self):
+        await self.wait_until_ready()  # wait until the bot logs in

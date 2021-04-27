@@ -1,4 +1,3 @@
-import asyncio
 import discord
 from discord.ext import tasks
 from price_bot import PriceBot
@@ -48,6 +47,10 @@ class SettBot(PriceBot):
                         + str(self.token_data.get("token_price_usd"))
                     )
 
+    @update_price.before_loop
+    async def before_update_price(self):
+        await self.wait_until_ready()  # wait until the bot logs in
+
     def _get_aum(self):
         supply = (
             self.token_contract.functions.totalSupply().call()
@@ -65,24 +68,10 @@ class SettBot(PriceBot):
     def _get_underlying_ratio(self):
         latest_transfer_log = self._get_latest_transfer_log()
 
-        assert len(latest_transfer_log) == 2
-        ratio = 1
-        if latest_transfer_log[0].get("args").get("to") == self.token_contract.address:
-            ratio = (
-                latest_transfer_log[0].get("args").get("value")
-                / 10 ** self.underlying_decimals
-            ) / (
-                latest_transfer_log[1].get("args").get("value")
-                / 10 ** self.token_contract.functions.decimals().call()
-            )
+        if self.token_display == "bDIGG":
+            ratio = self.token_contract.functions.balance().call() / self.token_contract.functions.totalSupply().call() * 10 ** (self.token_contract.functions.decimals().call()/2)
         else:
-            ratio = (
-                latest_transfer_log[1].get("args").get("value")
-                / 10 ** self.token_contract.functions.decimals().call()
-            ) / (
-                latest_transfer_log[0].get("args").get("value")
-                / 10 ** self.underlying_decimals
-            )
+            ratio = self.token_contract.functions.getPricePerFullShare().call() / 10 ** self.token_contract.functions.decimals().call()
 
         print(f"ratio is {round(ratio, 2)}")
         return round(ratio, 2)

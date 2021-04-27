@@ -3,7 +3,6 @@ from github import Github
 import json
 import logging
 import os
-import shortuuid
 import re
 import requests
 import time

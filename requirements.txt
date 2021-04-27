@@ -1,4 +1,6 @@
-github
-requests
-pytest
-shortuuid
+discord.py==1.7.1
+PyGithub==1.55
+pytest==6.2.3
+python-dotenv==0.17.0
+requests==2.25.1
+web3==5.18.0
