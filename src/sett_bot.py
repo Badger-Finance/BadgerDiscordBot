@@ -18,12 +18,6 @@ class SettBot(PriceBot):
 
         self._get_token_data()
 
-    async def on_ready(self):
-        print("Logged in as")
-        print(self.user.name)
-        print(self.user.id)
-        print("------")
-
     @tasks.loop(seconds=UPDATE_INTERVAL_SECONDS)
     async def update_price(self):
         """
@@ -53,30 +47,6 @@ class SettBot(PriceBot):
                         nick=f"{self.token_display} $"
                         + str(self.token_data.get("token_price_usd"))
                     )
-
-    @update_price.before_loop
-    async def before_update_price(self):
-        await self.wait_until_ready()  # wait until the bot logs in
-
-    def _get_token_data(self):
-        """
-        Private function to make call to coingecko to retrieve price and market cap for the token and update
-        token data property.
-        """
-        response = requests.get(
-            f"https://api.coingecko.com/api/v3/coins/{self.coingecko_token_id}"
-        ).content
-        token_data = json.loads(response)
-
-        token_price_usd = token_data.get("market_data").get("current_price").get("usd")
-        token_price_btc = token_data.get("market_data").get("current_price").get("btc")
-        market_cap = token_data.get("market_data").get("market_cap").get("usd")
-
-        self.token_data = {
-            "token_price_usd": token_price_usd,
-            "token_price_btc": token_price_btc,
-            "market_cap": market_cap,
-        }
 
     def _get_aum(self):
         supply = (
