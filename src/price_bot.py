@@ -2,17 +2,25 @@ import ast
 import discord
 from discord.ext import commands, tasks
 import json
+import logging
 import math
 import os
 import requests
 from web3 import Web3
 
 UPDATE_INTERVAL_SECONDS = 45
+cache = {}
 
 
 class PriceBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.logger = logging.getLogger("price-bot")
+        if cache.get("session") == None:
+            cache["session"] = requests.Session()
+        if cache.get("web3") == None:
+            cache["web3"] = Web3(Web3.HTTPProvider(os.getenv("INFURA_URL")))
+        self.session = cache.get("session")
 
         self.coingecko_token_id = kwargs.get("coingecko_token_id")
         self.token_display = kwargs.get("token_display")
@@ -23,7 +31,7 @@ class PriceBot(discord.Client):
             else None
         )
         if self.token_address and self.token_abi:
-            self.web3 = Web3(Web3.HTTPProvider(os.getenv("INFURA_URL")))
+            self.web3 = cache.get("web3")
             self.token_contract = self.web3.eth.contract(
                 address=self.web3.toChecksumAddress(self.token_address),
                 abi=self.token_abi,
@@ -34,10 +42,7 @@ class PriceBot(discord.Client):
         self.update_price.start()
 
     async def on_ready(self):
-        print("Logged in as")
-        print(self.user.name)
-        print(self.user.id)
-        print("------")
+        self.logger.info(f"Logged in as {self.user.name} {self.user.id}")
 
     @tasks.loop(seconds=UPDATE_INTERVAL_SECONDS)
     async def update_price(self):
@@ -56,7 +61,7 @@ class PriceBot(discord.Client):
         )
         await self.change_presence(activity=activity)
         for guild in self.guilds:
-            print(guild.members)
+            self.logger.info(guild.members)
             for member in guild.members:
                 if str(member.id) == self.discord_id:
                     await member.edit(
@@ -73,7 +78,7 @@ class PriceBot(discord.Client):
         Private function to make call to coingecko to retrieve price and market cap for the token and update
         token data property.
         """
-        response = requests.get(
+        response = self.session.get(
             f"https://api.coingecko.com/api/v3/coins/{self.coingecko_token_id}"
         ).content
         token_data = json.loads(response)

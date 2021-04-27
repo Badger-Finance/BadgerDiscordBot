@@ -17,6 +17,8 @@ if __name__ == "__main__":
     digg_client = DiggBot(
         coingecko_token_id="digg",
         token_display="DIGG",
+        token_address=os.getenv("DIGG_ADDRESS"),
+        token_abi=os.getenv("DIGG_ABI"),
         discord_id=os.getenv("BOT_ID_DIGG"),
     )
     bdigg_client = SettBot(
