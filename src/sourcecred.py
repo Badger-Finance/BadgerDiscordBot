@@ -15,9 +15,7 @@ class SourceCredManager:
     """
 
     def __init__(
-        self,
-        github_token: str,
-        repo: str,
+        self, github_token: str, repo: str,
     ):
         self.github_token = github_token
         self.repo = repo

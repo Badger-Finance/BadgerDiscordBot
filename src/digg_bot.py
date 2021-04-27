@@ -1,43 +1,18 @@
-import ast
 import discord
-from discord.ext import commands, tasks
-import json
-import math
-import os
+from discord.ext import tasks
+from price_bot import PriceBot
 import requests
+import json
 from web3 import Web3
 
 UPDATE_INTERVAL_SECONDS = 45
 
 
-class PriceBot(discord.Client):
+class DiggBot(PriceBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.coingecko_token_id = kwargs.get("coingecko_token_id")
-        self.token_display = kwargs.get("token_display")
-        self.token_address = kwargs.get("token_address")
-        self.token_abi = (
-            ast.literal_eval(kwargs.get("token_abi"))
-            if kwargs.get("token_abi")
-            else None
-        )
-        if self.token_address and self.token_abi:
-            self.web3 = Web3(Web3.HTTPProvider(os.getenv("INFURA_URL")))
-            self.token_contract = self.web3.eth.contract(
-                address=self.web3.toChecksumAddress(self.token_address),
-                abi=self.token_abi,
-            )
-        self.discord_id = kwargs.get("discord_id")
         self._get_token_data()
-
-        self.update_price.start()
-
-    async def on_ready(self):
-        print("Logged in as")
-        print(self.user.name)
-        print(self.user.id)
-        print("------")
 
     @tasks.loop(seconds=UPDATE_INTERVAL_SECONDS)
     async def update_price(self):
@@ -48,8 +23,11 @@ class PriceBot(discord.Client):
         # first get latest token data
         self._get_token_data()
 
-        activity_string = "mcap=$" + self._get_number_label(
-            self.token_data.get("market_cap")
+        activity_string = (
+            "mcap=$"
+            + self._get_number_label(self.token_data.get("market_cap"))
+            + " btc="
+            + str(round(self.token_data.get("token_price_btc"), 2))
         )
         activity = discord.Activity(
             name=activity_string, type=discord.ActivityType.playing,
@@ -88,24 +66,16 @@ class PriceBot(discord.Client):
             "market_cap": market_cap,
         }
 
-    def _get_number_label(self, value: str) -> str:
-        """
-        Formats number in billions, millions, or thousands into Discord name friendly string
+    def _get_aum(self):
+        supply = (
+            self.token_contract.functions.totalSupply().call()
+            / 10 ** self.token_contract.functions.decimals().call()
+        )
+        return supply * self.token_data.get("token_price_usd")
 
-        Args:
-            value (str): value between 0 - 999 billion
-
-        Returns:
-            str: formatted string. EG if 1,000,000,000 is passed in, will return 1B
-        """
-        # Nine Zeroes for Billions
-        if abs(int(value)) >= 1.0e9:
-            return str(round(abs(int(value)) / 1.0e9)) + "B"
-        # Six Zeroes for Millions
-        elif abs(int(value)) >= 1.0e6:
-            return str(round(abs(int(value)) / 1.0e6)) + "M"
-        # Three Zeroes for Thousands
-        elif abs(int(value)) >= 1.0e3:
-            return str(round(abs(int(value)) / 1.0e3)) + "K"
-        else:
-            return str(abs(int(value)))
+    def _get_supply(self):
+        supply = (
+            self.token_contract.functions.totalSupply().call()
+            / 10 ** self.token_contract.functions.decimals().call()
+        )
+        return supply
