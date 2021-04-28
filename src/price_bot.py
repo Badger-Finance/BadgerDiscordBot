@@ -1,4 +1,3 @@
-import ast
 import discord
 from discord.ext import commands, tasks
 import json
@@ -26,7 +25,7 @@ class PriceBot(discord.Client):
         self.token_display = kwargs.get("token_display")
         self.token_address = kwargs.get("token_address")
         self.token_abi = (
-            ast.literal_eval(kwargs.get("token_abi"))
+            kwargs.get("token_abi")
             if kwargs.get("token_abi")
             else None
         )

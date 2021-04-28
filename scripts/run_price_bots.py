@@ -1,5 +1,6 @@
 import asyncio
 from dotenv import load_dotenv
+import json
 import os
 import sys
 
@@ -13,19 +14,23 @@ from digg_bot import DiggBot
 load_dotenv()
 
 if __name__ == "__main__":
+    with open("./contracts/abi/digg.json") as digg_abi_file, open("./contracts/abi/sett.json") as sett_abi_file:
+        digg_abi = json.load(digg_abi_file)
+        sett_abi = json.load(sett_abi_file)
+
     loop = asyncio.get_event_loop()
     digg_client = DiggBot(
         coingecko_token_id="digg",
         token_display="DIGG",
         token_address=os.getenv("DIGG_ADDRESS"),
-        token_abi=os.getenv("DIGG_ABI"),
+        token_abi=digg_abi,
         discord_id=os.getenv("BOT_ID_DIGG"),
     )
     bdigg_client = SettBot(
         coingecko_token_id="badger-sett-digg",
         token_display="bDIGG",
         token_address=os.getenv("BDIGG_ADDRESS"),
-        token_abi=os.getenv("BDIGG_ABI"),
+        token_abi=sett_abi,
         discord_id=os.getenv("BOT_ID_BDIGG"),
         underlying_decimals=9,
     )
@@ -38,10 +43,11 @@ if __name__ == "__main__":
         coingecko_token_id="badger-sett-badger",
         token_display="bBADGER",
         token_address=os.getenv("BBADGER_ADDRESS"),
-        token_abi=os.getenv("BBADGER_ABI"),
+        token_abi=sett_abi,
         discord_id=os.getenv("BOT_ID_BBADGER"),
         underlying_decimals=18,
     )
+
     loop.create_task(digg_client.start(os.getenv("BOT_TOKEN_DIGG")))
     loop.create_task(bdigg_client.start(os.getenv("BOT_TOKEN_BDIGG")))
     loop.create_task(badger_client.start(os.getenv("BOT_TOKEN_BADGER")))
