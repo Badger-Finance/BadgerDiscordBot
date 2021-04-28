@@ -33,13 +33,13 @@ class SettBot(PriceBot):
             + " ratio="
             + str(self._get_underlying_ratio())
         )
-        print("activity string: " + activity_string)
+        self.logger.info("activity string: " + activity_string)
         activity = discord.Activity(
             name=activity_string, type=discord.ActivityType.playing,
         )
         await self.change_presence(activity=activity)
         for guild in self.guilds:
-            print(guild.members)
+            self.logger.info(guild.members)
             for member in guild.members:
                 if str(member.id) == self.discord_id:
                     await member.edit(
@@ -52,21 +52,17 @@ class SettBot(PriceBot):
         await self.wait_until_ready()  # wait until the bot logs in
 
     def _get_aum(self):
-        supply = (
-            self.token_contract.functions.totalSupply().call()
-            / 10 ** self.token_contract.functions.decimals().call()
-        )
-        return supply * self.token_data.get("token_price_usd")
+        return self._get_supply() * self.token_data.get("token_price_usd")
 
     def _get_supply(self):
         supply = (
             self.token_contract.functions.totalSupply().call()
             / 10 ** self.token_contract.functions.decimals().call()
         )
+        self.logger.info(f"{self.token_display} supply: {supply}")
         return supply
 
     def _get_underlying_ratio(self):
-        latest_transfer_log = self._get_latest_transfer_log()
 
         if self.token_display == "bDIGG":
             ratio = self.token_contract.functions.balance().call() / self.token_contract.functions.totalSupply().call() * 10 ** (self.token_contract.functions.decimals().call()/2)
