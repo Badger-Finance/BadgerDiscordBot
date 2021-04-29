@@ -39,7 +39,7 @@ class BadgerBot(discord.Client):
 
     async def register_user_for_sourcecred(self, message: discord.Message):
 
-        if self._user_already_registered_sourcecred(message.author.id):
+        if self._user_already_registered_sourcecred(str(message.author.id)):
             self.logger.info("User already registered for SourceCred. Sending message.")
             message_to_user = (
                 "You have already registered for SourceCred. You should be included in the "
