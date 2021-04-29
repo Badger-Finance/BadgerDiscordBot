@@ -20,6 +20,7 @@ class BadgerBot(discord.Client):
         super().__init__(*args, **kwargs)
 
         self.logger = logging.getLogger("honey-badger-bot")
+        self.logger.setLevel(logging.INFO)
         self.discord_id = kwargs.get("discord_id")
         self.sc = SourceCredManager(
             kwargs.get("github_pat"),
@@ -90,7 +91,6 @@ class BadgerBot(discord.Client):
         return registration_fields
 
     async def _send_user_registration_to_sqs(self, registration_fields: dict):
-        print("sending message")
         sent_message = self._send_sqs_message(self.sc.queue_name, registration_fields)
 
         if sent_message:
