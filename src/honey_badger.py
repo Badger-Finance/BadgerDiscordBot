@@ -1,5 +1,6 @@
 import boto3
 import discord
+from dotenv import load_dotenv()
 from discord.ext import commands, tasks
 import json
 import logging
@@ -7,6 +8,8 @@ import math
 import os
 import requests
 from sourcecred import SourceCredManager
+
+load_dotenv()
 
 SC_REGISTRATION_TABLE_NAME = os.getenv("SC_REGISTRATION_TABLE_NAME")
 SC_REGISTRATION_QUEUE_NAME = os.getenv("SC_REGISTRATION_QUEUE_NAME")
