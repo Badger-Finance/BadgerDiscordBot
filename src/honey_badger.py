@@ -43,32 +43,32 @@ class BadgerBot(discord.Client):
                 "current cred scores. If you believe you are not, reach out to an admin. Thanks!"
             )
             await self.send_user_dm(message.author.id, message_to_user)
-            return
+            
+        else:
+            registration_fields = self._get_sourcecred_registration_fields(message)
+            github = registration_fields.get("github")
+            discourse = registration_fields.get("discourse")
+            wallet_addr = registration_fields.get("wallet_address")
 
-        registration_fields = self._get_sourcecred_registration_fields(message)
-        github = registration_fields.get("github")
-        discourse = registration_fields.get("discourse")
-        wallet_addr = registration_fields.get("wallet_address")
+            embed = discord.Embed(
+                title="**Sourcecred registration received**",
+                description=f"Received registration request for user {message.author.display_name}. "
+                f"Registering user with the following fields.",
+            )
 
-        embed = discord.Embed(
-            title="**Sourcecred registration received**",
-            description=f"Received registration request for user {message.author.display_name}. "
-            f"Registering user with the following fields.",
-        )
+            embed.add_field(
+                name="Github", value=f"{github}", inline=False
+            ) if github else None
+            embed.add_field(
+                name="Discourse", value=f"{discourse}", inline=False
+            ) if discourse else None
+            embed.add_field(
+                name="Address", value=f"{wallet_addr}", inline=False
+            ) if wallet_addr else None
 
-        embed.add_field(
-            name="Github", value=f"{github}", inline=False
-        ) if github else None
-        embed.add_field(
-            name="Discourse", value=f"{discourse}", inline=False
-        ) if discourse else None
-        embed.add_field(
-            name="Address", value=f"{wallet_addr}", inline=False
-        ) if wallet_addr else None
-
-        self.logger.info(f"registration fields: {registration_fields}")
-        await self._send_user_registration_to_sqs(registration_fields)
-        await message.channel.send(embed=embed)
+            self.logger.info(f"registration fields: {registration_fields}")
+            await self._send_user_registration_to_sqs(registration_fields)
+            await message.channel.send(embed=embed)
 
     def _get_sourcecred_registration_fields(self, message: discord.Message) -> dict:
         registration_fields = {}
