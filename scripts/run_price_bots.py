@@ -14,7 +14,9 @@ from digg_bot import DiggBot
 load_dotenv()
 
 if __name__ == "__main__":
-    with open("./contracts/abi/digg.json") as digg_abi_file, open("./contracts/abi/sett.json") as sett_abi_file:
+    with open("./contracts/abi/digg.json") as digg_abi_file, open(
+        "./contracts/abi/sett.json"
+    ) as sett_abi_file:
         digg_abi = json.load(digg_abi_file)
         sett_abi = json.load(sett_abi_file)
 

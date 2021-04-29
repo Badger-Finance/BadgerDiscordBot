@@ -13,14 +13,14 @@ class SourceCredManager:
     Contains all functions required to manage Badger's sourcecred ecosystem
     """
 
-    def __init__(
-        self, github_token: str, repo: str,
-    ):
+    def __init__(self, github_token: str, repo: str, queue_name: str, table_name: str):
         self.github_token = github_token
         self.repo = repo
         self.ledger = self.get_current_ledger(
             f"https://raw.githubusercontent.com/{repo}/master/data/ledger.json"
         )
+        self.queue_name = queue_name
+        self.table_name = table_name
         self.logger = logging.getLogger("badger-bot")
 
     def get_current_ledger(self, ledger_url: str) -> list:

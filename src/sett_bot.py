@@ -35,7 +35,8 @@ class SettBot(PriceBot):
         )
         self.logger.info("activity string: " + activity_string)
         activity = discord.Activity(
-            name=activity_string, type=discord.ActivityType.playing,
+            name=activity_string,
+            type=discord.ActivityType.playing,
         )
         await self.change_presence(activity=activity)
         for guild in self.guilds:
@@ -65,9 +66,16 @@ class SettBot(PriceBot):
     def _get_underlying_ratio(self):
 
         if self.token_display == "bDIGG":
-            ratio = self.token_contract.functions.balance().call() / self.token_contract.functions.totalSupply().call() * 10 ** (self.token_contract.functions.decimals().call()/2)
+            ratio = (
+                self.token_contract.functions.balance().call()
+                / self.token_contract.functions.totalSupply().call()
+                * 10 ** (self.token_contract.functions.decimals().call() / 2)
+            )
         else:
-            ratio = self.token_contract.functions.getPricePerFullShare().call() / 10 ** self.token_contract.functions.decimals().call()
+            ratio = (
+                self.token_contract.functions.getPricePerFullShare().call()
+                / 10 ** self.token_contract.functions.decimals().call()
+            )
 
         print(f"ratio is {round(ratio, 2)}")
         return round(ratio, 2)
@@ -96,4 +104,4 @@ class SettBot(PriceBot):
 
         if transfers == []:
             raise ValueError(f"Something wrong, no valid txs in last 10k blocks")
-            #TODO: send message to mod to let them know something wrong with bot
+            # TODO: send message to mod to let them know something wrong with bot

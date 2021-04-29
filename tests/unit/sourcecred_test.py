@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import os
 import pytest
 import sys
@@ -9,8 +10,10 @@ sys.path.insert(
 
 from sourcecred import SourceCredManager
 
+load_dotenv()
+
 sc = SourceCredManager(
-    github_token=os.getenv("BADGER_SOURCECRED_TEST_REPO_TOKEN"),
+    github_token=os.getenv("BADGER_SOURCECRED_PAT_TEST"),
     repo="btcookies/SourceCred",
 )
 

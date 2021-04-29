@@ -24,11 +24,7 @@ class PriceBot(discord.Client):
         self.coingecko_token_id = kwargs.get("coingecko_token_id")
         self.token_display = kwargs.get("token_display")
         self.token_address = kwargs.get("token_address")
-        self.token_abi = (
-            kwargs.get("token_abi")
-            if kwargs.get("token_abi")
-            else None
-        )
+        self.token_abi = kwargs.get("token_abi") if kwargs.get("token_abi") else None
         if self.token_address and self.token_abi:
             self.web3 = cache.get("web3")
             self.token_contract = self.web3.eth.contract(
@@ -56,7 +52,8 @@ class PriceBot(discord.Client):
             self.token_data.get("market_cap")
         )
         activity = discord.Activity(
-            name=activity_string, type=discord.ActivityType.playing,
+            name=activity_string,
+            type=discord.ActivityType.playing,
         )
         await self.change_presence(activity=activity)
         for guild in self.guilds:

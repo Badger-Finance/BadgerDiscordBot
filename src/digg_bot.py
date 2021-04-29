@@ -31,6 +31,7 @@ UNISWAP_POOL_QUERY = """
     }
     """
 
+
 class DiggBot(PriceBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -53,7 +54,8 @@ class DiggBot(PriceBot):
             + str(round(self.token_data.get("token_price_btc"), 2))
         )
         activity = discord.Activity(
-            name=activity_string, type=discord.ActivityType.playing,
+            name=activity_string,
+            type=discord.ActivityType.playing,
         )
         await self.change_presence(activity=activity)
         for guild in self.guilds:
@@ -68,7 +70,7 @@ class DiggBot(PriceBot):
     @update_price.before_loop
     async def before_update_price(self):
         await self.wait_until_ready()  # wait until the bot logs in
-    
+
     def _get_token_data(self):
         """
         Private function to make call to thegraph to retrieve price and market cap for the token and update
@@ -79,7 +81,7 @@ class DiggBot(PriceBot):
         ).content
         token_data = json.loads(response)
 
-        token_price_btc =  self._get_digg_wbtc_price()
+        token_price_btc = self._get_digg_wbtc_price()
         token_price_usd = token_price_btc * self._get_wbtc_usdc_price()
         market_cap = token_price_usd * Decimal(self._get_supply())
 
@@ -88,12 +90,13 @@ class DiggBot(PriceBot):
             "token_price_btc": token_price_btc,
             "market_cap": market_cap,
         }
-    
+
     def _get_digg_wbtc_price(self):
         variables = {"pairId": os.getenv("WBTC_DIGG_PAIR_ID")}
 
         request = self.session.post(
-            os.getenv("UNISWAP_SUBGRAPH"), json={"query": UNISWAP_POOL_QUERY, "variables": variables}
+            os.getenv("UNISWAP_SUBGRAPH"),
+            json={"query": UNISWAP_POOL_QUERY, "variables": variables},
         )
 
         self.logger.info(f"digg_wbtc_price: {request.json()}")
@@ -103,13 +106,14 @@ class DiggBot(PriceBot):
             if request.json()["data"]["pair"] == None
             else Decimal(request.json()["data"]["pair"]["token0Price"])
         )
-    
+
     def _get_wbtc_usdc_price(self) -> Decimal:
 
         variables = {"pairId": os.getenv("WBTC_USDC_PAIR_ID")}
 
         request = self.session.post(
-            os.getenv("UNISWAP_SUBGRAPH"), json={"query": UNISWAP_POOL_QUERY, "variables": variables}
+            os.getenv("UNISWAP_SUBGRAPH"),
+            json={"query": UNISWAP_POOL_QUERY, "variables": variables},
         )
 
         self.logger.info(f"wbtc_usdc_price: {request.json()}")
