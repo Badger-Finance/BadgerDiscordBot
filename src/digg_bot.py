@@ -5,9 +5,13 @@ from price_bot import PriceBot
 import os
 import requests
 import json
+from time import sleep
 from web3 import Web3
 
 UPDATE_INTERVAL_SECONDS = 45
+
+UNISWAP_SUBGRAPH = os.getenv("UNISWAP_SUBGRAPH")
+WBTC_USDC_PAIR_ID = os.getenv("WBTC_USDC_PAIR_ID")
 UNISWAP_POOL_QUERY = """
     query($pairId: String!) {
         pair(
@@ -91,28 +95,31 @@ class DiggBot(PriceBot):
             "market_cap": market_cap,
         }
 
-    def _get_digg_wbtc_price(self):
+    def _get_digg_wbtc_price(self, retry: bool = False):
+        if retry:
+            sleep(2)
+
         variables = {"pairId": os.getenv("WBTC_DIGG_PAIR_ID")}
 
         request = self.session.post(
-            os.getenv("UNISWAP_SUBGRAPH"),
+            UNISWAP_SUBGRAPH,
             json={"query": UNISWAP_POOL_QUERY, "variables": variables},
         )
 
         self.logger.info(f"digg_wbtc_price: {request.json()}")
 
         return (
-            None
-            if request.json()["data"]["pair"] == None
-            else Decimal(request.json()["data"]["pair"]["token0Price"])
+            self._get_digg_wbtc_price(retry=True)
+            if request.json().get("data", {}).get("pair") == None
+            else Decimal(request.json().get("data").get("pair").get("token0Price"))
         )
 
     def _get_wbtc_usdc_price(self) -> Decimal:
 
-        variables = {"pairId": os.getenv("WBTC_USDC_PAIR_ID")}
+        variables = {"pairId": WBTC_USDC_PAIR_ID}
 
         request = self.session.post(
-            os.getenv("UNISWAP_SUBGRAPH"),
+            UNISWAP_SUBGRAPH,
             json={"query": UNISWAP_POOL_QUERY, "variables": variables},
         )
 

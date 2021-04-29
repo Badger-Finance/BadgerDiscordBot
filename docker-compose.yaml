@@ -1,8 +1,22 @@
 version: "3.9"
 services:
-  # price-bots:
-  #   context: .
-  #   dockerfile: ./docker/price-bots/Dockerfile
+  badger-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/price-bots/badger-bot/Dockerfile
+  bbadger-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/price-bots/bbadger-bot/Dockerfile
+  digg-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/price-bots/digg-bot/Dockerfile
+  bdigg-bot:
+    build: 
+      context: .
+      dockerfile: ./docker/price-bots/bdigg-bot/Dockerfile
   honey-badger:
-    context: .
-    dockerfile: ./docker/general-bot/Dockerfile
+    build: 
+      context: .
+      dockerfile: ./docker/general-bot/Dockerfile

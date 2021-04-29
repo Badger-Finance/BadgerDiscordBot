@@ -7,6 +7,13 @@ import os
 import requests
 from web3 import Web3
 
+logging.basicConfig(
+    # filename="price_bots_log.txt",
+    # filemode='a',
+    # format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+    # datefmt='%H:%M:%S',
+    level=logging.INFO
+)
 UPDATE_INTERVAL_SECONDS = 45
 cache = {}
 
