@@ -28,7 +28,6 @@ badger_bot = BadgerBot(
     discord_id=os.getenv("BOT_TOKEN_GENERAL"),
     github_pat=os.getenv("BADGER_SOURCECRED_PAT_TEST"),
     github_repo="btcookies/SourceCred",
-    
 )
 badger_bot.sc.queue_name = "sourcecred-registration-requests"
 badger_bot.sc.table_name = "sourcecred-registration"
@@ -139,4 +138,3 @@ def test_user_already_registered_sourcecred(dynamodb, monkeypatch):
         == True
     )
     assert badger_bot._user_already_registered_sourcecred("random") == False
-

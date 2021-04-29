@@ -43,7 +43,7 @@ class BadgerBot(discord.Client):
                 "current cred scores. If you believe you are not, reach out to an admin. Thanks!"
             )
             await self.send_user_dm(message.author.id, message_to_user)
-            
+
         else:
             registration_fields = self._get_sourcecred_registration_fields(message)
             github = registration_fields.get("github")
@@ -126,9 +126,7 @@ class BadgerBot(discord.Client):
             self.logger.error("Error sending dm to user.")
 
     def _user_already_registered_sourcecred(self, user_id: str) -> bool:
-        return self.exists_in_dynamodb(
-            "discord_id", user_id, self.sc.table_name
-        )
+        return self.exists_in_dynamodb("discord_id", user_id, self.sc.table_name)
 
     def exists_in_dynamodb(
         self, key_name: str, key_value: str, table_name: str

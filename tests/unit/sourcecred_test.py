@@ -16,7 +16,7 @@ sc = SourceCredManager(
     github_token=os.getenv("BADGER_SOURCECRED_PAT_TEST"),
     repo="btcookies/SourceCred",
     queue_name="sourcecred-registration-requests",
-    table_name="sourcecred-registration"
+    table_name="sourcecred-registration",
 )
 
 
