@@ -69,6 +69,7 @@ class SourceCredManager:
             identity_id = self.get_discord_user_identity_id(discord_id)
 
             if identity_id:
+                self.logger.info(f"Found identity_id {identity_id} for user {discord_id}, creating record.")
                 activation_actions.append(self.create_activation_action(identity_id))
                 activated_users.append(discord_id)
             # else:
@@ -160,6 +161,7 @@ class SourceCredManager:
         return False if re.search(_RE_UNCLEAN, uuid, flags=re.IGNORECASE) else True
 
     def update_ledger(self, activation_actions: list) -> None:
+        self.logger.info("Updating ledger with new users")
         self.ledger.extend(activation_actions)
         actions = [json.dumps(action) for action in self.ledger]
 
