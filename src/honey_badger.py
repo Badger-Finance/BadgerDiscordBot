@@ -13,6 +13,7 @@ load_dotenv()
 
 SC_REGISTRATION_TABLE_NAME = os.getenv("SC_REGISTRATION_TABLE_NAME")
 SC_REGISTRATION_QUEUE_NAME = os.getenv("SC_REGISTRATION_QUEUE_NAME")
+REGISTER_POLL_INTERVAL_HOURS = 1
 
 
 class BadgerBot(discord.Client):
@@ -28,6 +29,19 @@ class BadgerBot(discord.Client):
             queue_name=SC_REGISTRATION_QUEUE_NAME,
             table_name=SC_REGISTRATION_TABLE_NAME,
         )
+        # aws resources for storing data
+        self.sqs_client = boto3.client("sqs")
+        self.sourcecred_queue_url = self.sqs_client.get_queue_url(
+            QueueName=SC_REGISTRATION_QUEUE_NAME
+        )["QueueUrl"]
+        self.sourcecred_queue = boto3.resource("sqs").get_queue_by_name(
+            QueueName=SC_REGISTRATION_QUEUE_NAME
+        )
+
+        self.dynamodb_resource = boto3.resource("dynamodb")
+        self.registration_table = self.dynamodb_resource.Table(
+            SC_REGISTRATION_TABLE_NAME
+        )
 
     async def on_ready(self):
         self.logger.info(f"Logged in as {self.user.name} {self.user.id}")
@@ -35,10 +49,35 @@ class BadgerBot(discord.Client):
     async def on_message(self, message):
         if self.user.id != message.author.id:
             if "!register" in message.content:
-                # TODO: send discord_id to sqs
-                await self.register_user_for_sourcecred(message)
+                await self.submit_sourcecred_user_registration(message)
 
-    async def register_user_for_sourcecred(self, message: discord.Message):
+    @tasks.loop(minutes=REGISTER_POLL_INTERVAL_HOURS)
+    async def process_outstanding_registration_requests(self):
+        """
+        Asynchronous function that runs every REGISTER_POLL_INTERVAL_HOURS to get all of the
+        current sourcecred registration requests and invoke the SourceCredManager to register
+        the users to the ledger.json
+        """
+        # poll queue to get messages
+        registration_messages = self._get_outstanding_registration_messages()
+
+        # check and make sure not duplicate messages from user, if so only process latest one
+        unique_registrations = self._get_unique_registrations(registration_messages)
+
+        # submit list of discord ids to register on sourcecred
+        discord_ids = [discord_id for discord_id in unique_registrations.keys()]
+
+        activated_users = self.sc.activate_discord_users(discord_ids)
+
+        # after successful registration, add entry to db for user marking them registered
+        if len(activated_users) > 0:
+            self._mark_users_activated(activated_users, unique_registrations)
+
+    @process_outstanding_registration_requests.before_loop
+    async def before_update_price(self):
+        await self.wait_until_ready()  # wait until the bot logs in
+
+    async def submit_sourcecred_user_registration(self, message: discord.Message):
 
         if self._user_already_registered_sourcecred(str(message.author.id)):
             self.logger.info("User already registered for SourceCred. Sending message.")
@@ -106,12 +145,10 @@ class BadgerBot(discord.Client):
             )
 
     def _send_sqs_message(self, queue_name: str, message: dict):
-        sqs_client = boto3.client("sqs")
-        sqs_queue_url = sqs_client.get_queue_url(QueueName=queue_name)["QueueUrl"]
 
         try:
-            msg = sqs_client.send_message(
-                QueueUrl=sqs_queue_url, MessageBody=json.dumps(message)
+            msg = self.sqs_client.send_message(
+                QueueUrl=self.sourcecred_queue_url, MessageBody=json.dumps(message)
             )
         except Exception as e:
             self.logger.error("Error sending SQS message")
@@ -136,9 +173,7 @@ class BadgerBot(discord.Client):
     ) -> bool:
 
         try:
-            dynamodb = boto3.resource("dynamodb")
-            table = dynamodb.Table(table_name)
-
+            table = self.dynamodb_resource.Table(table_name)
             item = table.get_item(Key={key_name: key_value})
         except Exception as e:
             self.logger.error(
@@ -152,3 +187,86 @@ class BadgerBot(discord.Client):
             raise e
 
         return item.get("Item") != None
+
+    def _get_outstanding_registration_messages(self) -> list:
+
+        all_messages = []
+        current_batch = self.sourcecred_queue.receive_messages()
+
+        while len(current_batch) > 0:
+            all_messages.extend(current_batch)
+            current_batch = self.sourcecred_queue.receive_messages()
+
+        return all_messages
+
+    def _get_unique_registrations(self, registration_messages: list) -> dict:
+        """
+        Takes list of sourcecred registration mesages from sqs and returns
+        a dict containing the unique ones
+
+        Args:
+            registration_messages (list): list of raw sqs messages from sourcecred
+            registration queue
+
+        Returns:
+            dict: example struct
+            {
+                "discord_id_1": {
+                    "discord_name": "ExampleUser#0001"
+                },
+                "discord_id_2": {
+                    "discord_name": "ExampleUser#0002",
+                    "github": "ExampleUser",
+                    "discourse": "ExampleUser",
+                    "wallet_address": "0x1234567890123456789"
+                },
+            }
+        """
+        unique_registrations = {}
+
+        for message in registration_messages:
+            if message.body:
+                body = json.loads(message.body)
+                discord_id = body.get("discord_id")
+                if discord_id == None:
+                    self.logger.error(f"Discord id is null for message {body}")
+                else:
+                    unique_registrations[discord_id] = body
+                    self.logger.info(
+                        (f"Processed message for user {discord_id} with body {body}")
+                    )
+            else:
+                self.logger.info(f"No body for message {message}")
+            # Let the queue know that the message is processed
+            message.delete()
+
+        return unique_registrations
+
+    def _mark_users_activated(self, activated_users: list, unique_registrations: dict):
+        for user_id in activated_users:
+            user_data = unique_registrations.get(user_id)
+            if user_data:
+                self.add_user_to_dynamodb(user_data)
+            else:
+                self.logger.error(
+                    f"Something wrong, activated user {user_id} not exist in unique registrations"
+                )
+
+    def add_user_to_dynamodb(self, data):
+        self.registration_table.update_item(
+            Key={"discord_id": data.get("discord_id")},
+            ExpressionAttributeNames={
+                "#G": "github_username",
+                "#DS": "discourse_username",
+                "#W": "wallet_address",
+                "#DD": "discord_username",
+            },
+            ExpressionAttributeValues={
+                ":g": data.get("github"),
+                ":ds": data.get("discourse"),
+                ":w": data.get("wallet_address"),
+                ":dd": data.get("discord_name"),
+            },
+            UpdateExpression="SET #G=:g, #DS=:ds, #W=:w, #DD=:dd",
+        )
+        self.logger.info(f"Registered user with data {data}")
