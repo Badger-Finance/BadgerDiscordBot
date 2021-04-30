@@ -1,5 +1,5 @@
 boto3==1.17.60
-moto==1.3.16
+moto==1.3.16.dev122
 discord.py==1.7.1
 PyGithub==1.55
 pytest==6.2.3
