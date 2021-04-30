@@ -1,11 +1,23 @@
-FROM python:3.8-alpine
+FROM python:3.8-alpine3.13
 
 WORKDIR /BadgerDiscordBot
 
-COPY requirements.txt requirements.txt
+ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
+
+RUN apk add --no-cache \
+        libressl-dev \
+        musl-dev \
+        gcc \
+        make \
+        libffi-dev \
+
+COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN apk del \
+        libressl-dev \
+        musl-dev \
+        gcc \
+        make \
+        libffi-dev
 
-COPY . .
-ADD  /scripts/run_digg_bot.py /
-
-CMD [ "python", "scripts/run_digg_bot.py" ]
+CMD [ "python", "scripts/price-bots/run_digg_bot.py" ]
