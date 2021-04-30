@@ -48,7 +48,7 @@ class SourceCredManager:
         - discord_ids: list of string ids representing discord identity
 
         returns
-        - list of dicts representing TOGGLE_ACTIVATION actions.
+        - list of discord_ids of users that were successfully activated
 
         example TOGGGLE_ACTIVATION action:
         {
@@ -63,18 +63,21 @@ class SourceCredManager:
         }
         """
         activation_actions = []
+        activated_users = []
         for discord_id in discord_ids:
 
             identity_id = self.get_discord_user_identity_id(discord_id)
 
             if identity_id:
                 activation_actions.append(self.create_activation_action(identity_id))
+                activated_users.append(discord_id)
             # else:
             # TODO: send user message asking them to wait to register until tomorrow, haven't been in server long enough
 
-        self.update_ledger(activation_actions)
+        if len(activation_actions) > 0:
+            self.update_ledger(activation_actions)
 
-        self.mark_users_active(discord_ids)
+        return activated_users
 
     def get_discord_user_identity_id(self, user_discord_id: str) -> str:
         """
@@ -219,12 +222,3 @@ class SourceCredManager:
         raise ValueError(
             f"Tree with sha {tree_sha} did not contain the ledger.json file"
         )
-
-    def mark_users_active(self, discord_ids: list):
-        """
-        TODO: implement function to write discord id to db and mark as active
-
-        Args:
-            discord_ids (list): [description]
-        """
-        pass
