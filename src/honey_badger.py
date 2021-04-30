@@ -177,9 +177,9 @@ class BadgerBot(discord.Client):
         return msg
 
     async def send_user_dm(self, user_id: int, message: str):
-        user = self.get_user(user_id)
         try:
             # dm user letting them know registration failed
+            user = self.fetch_user(user_id)
             await user.send(message)
         except Exception as e:
             self.logger.error("Error sending dm to user.")
