@@ -20,7 +20,7 @@ services:
   #   build:
   #     context: .
   #     dockerfile: ./docker/price-bots/all-bots/Dockerfile
-  # honey-badger:
-  #   build: 
-  #     context: .
-  #     dockerfile: ./docker/general-bot/Dockerfile
+  honey-badger:
+    build: 
+      context: .
+      dockerfile: ./docker/general-bot/Dockerfile
