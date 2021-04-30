@@ -11,6 +11,14 @@ from sourcecred import SourceCredManager
 
 load_dotenv()
 
+logging.basicConfig(
+    # filename="price_bots_log.txt",
+    # filemode='a',
+    # format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+    # datefmt='%H:%M:%S',
+    level=logging.INFO
+)
+
 SC_REGISTRATION_TABLE_NAME = os.getenv("SC_REGISTRATION_TABLE_NAME")
 SC_REGISTRATION_QUEUE_NAME = os.getenv("SC_REGISTRATION_QUEUE_NAME")
 REGISTER_POLL_INTERVAL_HOURS = 1
@@ -58,6 +66,7 @@ class BadgerBot(discord.Client):
         current sourcecred registration requests and invoke the SourceCredManager to register
         the users to the ledger.json
         """
+        self.logger.info("Checking for outstanding registration requests.")
         # poll queue to get messages
         registration_messages = self._get_outstanding_registration_messages()
 
@@ -78,6 +87,7 @@ class BadgerBot(discord.Client):
         await self.wait_until_ready()  # wait until the bot logs in
 
     async def submit_sourcecred_user_registration(self, message: discord.Message):
+        self.logger.info("Received sourcecred user registration message.")
 
         if self._user_already_registered_sourcecred(str(message.author.id)):
             self.logger.info("User already registered for SourceCred. Sending message.")
