@@ -51,6 +51,8 @@ class BadgerBot(discord.Client):
             SC_REGISTRATION_TABLE_NAME
         )
 
+        self.process_outstanding_registration_requests.start()
+
     async def on_ready(self):
         self.logger.info(f"Logged in as {self.user.name} {self.user.id}")
 
