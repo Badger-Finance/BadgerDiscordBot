@@ -181,8 +181,9 @@ class BadgerBot(discord.Client):
         try:
             # dm user letting them know registration failed
             await user.send(message)
-        except:
+        except Exception as e:
             self.logger.error("Error sending dm to user.")
+            self.logger.error(e)
 
     def _user_already_registered_sourcecred(self, user_id: str) -> bool:
         return self.exists_in_dynamodb("discord_id", user_id, self.sc.table_name)
