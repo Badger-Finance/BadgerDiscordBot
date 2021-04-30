@@ -28,31 +28,31 @@ if __name__ == "__main__":
         token_abi=digg_abi,
         discord_id=os.getenv("BOT_ID_DIGG"),
     )
-    # bdigg_client = SettBot(
-    #     coingecko_token_id="badger-sett-digg",
-    #     token_display="bDIGG",
-    #     token_address=os.getenv("BDIGG_ADDRESS"),
-    #     token_abi=sett_abi,
-    #     discord_id=os.getenv("BOT_ID_BDIGG"),
-    #     underlying_decimals=9,
-    # )
-    # badger_client = PriceBot(
-    #     coingecko_token_id="badger-dao",
-    #     token_display="BADGER",
-    #     discord_id=os.getenv("BOT_ID_BADGER"),
-    # )
-    # bbadger_client = SettBot(
-    #     coingecko_token_id="badger-sett-badger",
-    #     token_display="bBADGER",
-    #     token_address=os.getenv("BBADGER_ADDRESS"),
-    #     token_abi=sett_abi,
-    #     discord_id=os.getenv("BOT_ID_BBADGER"),
-    #     underlying_decimals=18,
-    # )
+    bdigg_client = SettBot(
+        coingecko_token_id="badger-sett-digg",
+        token_display="bDIGG",
+        token_address=os.getenv("BDIGG_ADDRESS"),
+        token_abi=sett_abi,
+        discord_id=os.getenv("BOT_ID_BDIGG"),
+        underlying_decimals=9,
+    )
+    badger_client = PriceBot(
+        coingecko_token_id="badger-dao",
+        token_display="BADGER",
+        discord_id=os.getenv("BOT_ID_BADGER"),
+    )
+    bbadger_client = SettBot(
+        coingecko_token_id="badger-sett-badger",
+        token_display="bBADGER",
+        token_address=os.getenv("BBADGER_ADDRESS"),
+        token_abi=sett_abi,
+        discord_id=os.getenv("BOT_ID_BBADGER"),
+        underlying_decimals=18,
+    )
 
     loop.create_task(digg_client.start(os.getenv("BOT_TOKEN_DIGG")))
-    # loop.create_task(bdigg_client.start(os.getenv("BOT_TOKEN_BDIGG")))
-    # loop.create_task(badger_client.start(os.getenv("BOT_TOKEN_BADGER")))
-    # loop.create_task(bbadger_client.start(os.getenv("BOT_TOKEN_BBADGER")))
+    loop.create_task(bdigg_client.start(os.getenv("BOT_TOKEN_BDIGG")))
+    loop.create_task(badger_client.start(os.getenv("BOT_TOKEN_BADGER")))
+    loop.create_task(bbadger_client.start(os.getenv("BOT_TOKEN_BBADGER")))
 
     loop.run_forever()
