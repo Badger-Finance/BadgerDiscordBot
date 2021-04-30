@@ -83,6 +83,8 @@ class BadgerBot(discord.Client):
         # after successful registration, add entry to db for user marking them registered
         if len(activated_users) > 0:
             self._mark_users_activated(activated_users, unique_registrations)
+            self.logger.info("Successfully activated following users")
+            self.logger.info(activated_users)
 
     @process_outstanding_registration_requests.before_loop
     async def before_update_price(self):
@@ -136,7 +138,7 @@ class BadgerBot(discord.Client):
             elif "address:" in line:
                 registration_fields["wallet_address"] = line.split(":")[-1].strip()
 
-        registration_fields["discord_id"] = message.author.id
+        registration_fields["discord_id"] = str(message.author.id)
         registration_fields["discord_name"] = message.author.display_name
 
         return registration_fields
