@@ -77,8 +77,8 @@ class SettBot(PriceBot):
                 / 10 ** self.token_contract.functions.decimals().call()
             )
 
-        print(f"ratio is {round(ratio, 2)}")
-        return round(ratio, 2)
+        print(f"ratio is {round(ratio, 3)}")
+        return round(ratio, 3)
 
     def _get_latest_transfer_log(self):
         latest_block = self.web3.eth.get_block("latest").get("number")
