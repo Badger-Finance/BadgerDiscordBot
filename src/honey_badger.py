@@ -102,7 +102,7 @@ class BadgerBot(discord.Client):
                 "You have already registered for SourceCred. You should be included in the "
                 "current cred scores. If you believe you are not, reach out to an admin. Thanks!"
             )
-            await self.send_user_dm(message.author.id, message_to_user)
+            await self.send_user_dm(int(message.author.id), message_to_user)
 
         else:
             registration_fields = self._get_sourcecred_registration_fields(message)
@@ -160,7 +160,7 @@ class BadgerBot(discord.Client):
                 "Please reach out to an admin or try again later."
             )
             await self.send_user_dm(
-                registration_fields.get("discord_id"), message_to_user
+                int(registration_fields.get("discord_id")), message_to_user
             )
 
     def _send_sqs_message(self, queue_name: str, message: dict):
@@ -176,11 +176,11 @@ class BadgerBot(discord.Client):
 
         return msg
 
-    async def send_user_dm(self, user_id: str, message: str):
-        user = await self.fetch_user_info(user_id)
+    async def send_user_dm(self, user_id: int, message: str):
+        user = await self.get_user(user_id)
         try:
             # dm user letting them know registration failed
-            await user.send_message(message)
+            await user.send(message)
         except:
             self.logger.error("Error sending dm to user.")
 
