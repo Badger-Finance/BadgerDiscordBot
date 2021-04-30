@@ -75,8 +75,11 @@ class BadgerBot(discord.Client):
         # check and make sure not duplicate messages from user, if so only process latest one
         unique_registrations = self._get_unique_registrations(registration_messages)
 
+        self.logger.info(f"unique registrations received: {unique_registrations}")
+
         # submit list of discord ids to register on sourcecred
         discord_ids = [discord_id for discord_id in unique_registrations.keys()]
+        self.logger.info(f"submitting discord_ids {discord_ids}")
 
         activated_users = self.sc.activate_discord_users(discord_ids)
 
