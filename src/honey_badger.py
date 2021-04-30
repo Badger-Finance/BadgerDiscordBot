@@ -58,7 +58,7 @@ class BadgerBot(discord.Client):
 
     async def on_message(self, message):
         if self.user.id != message.author.id:
-            if "!register" in message.content:
+            if message.content.startswith("!register"):
                 await self.submit_sourcecred_user_registration(message)
 
     @tasks.loop(minutes=REGISTER_POLL_INTERVAL_HOURS)
@@ -116,7 +116,7 @@ class BadgerBot(discord.Client):
                 f"Registering user with the following fields.",
             )
             embed.add_field(
-                "Discord", value=f"{message.author.display_name}", inline=False
+                name="Discord", value=f"{message.author.display_name}", inline=False
             )
             embed.add_field(
                 name="Github", value=f"{github}", inline=False
@@ -136,11 +136,11 @@ class BadgerBot(discord.Client):
         registration_fields = {}
 
         for line in message.content.split("\n"):
-            if "github:" in line:
+            if line.startswith("github:"):
                 registration_fields["github"] = line.split(":")[-1].strip()
-            elif "discourse:" in line:
+            elif line.startswith("discourse:"):
                 registration_fields["discourse"] = line.split(":")[-1].strip()
-            elif "address:" in line:
+            elif line.startswith("address:"):
                 registration_fields["wallet_address"] = line.split(":")[-1].strip()
 
         registration_fields["discord_id"] = str(message.author.id)
