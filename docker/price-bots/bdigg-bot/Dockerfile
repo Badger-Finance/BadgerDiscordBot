@@ -10,7 +10,7 @@ RUN apk add --no-cache \
         gcc \
         make \
         libffi-dev
-        
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN apk del \
@@ -19,5 +19,7 @@ RUN apk del \
         gcc \
         make \
         libffi-dev
+
+COPY . .
 
 CMD [ "python", "scripts/price-bots/run_bdigg_bot.py" ]

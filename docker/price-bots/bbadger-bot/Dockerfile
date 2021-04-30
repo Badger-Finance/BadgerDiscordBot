@@ -20,4 +20,6 @@ RUN apk del \
         make \
         libffi-dev
 
+COPY . .
+
 CMD [ "python", "scripts/price-bots/run_bbadger_bot.py" ]
