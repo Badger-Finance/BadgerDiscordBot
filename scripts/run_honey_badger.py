@@ -18,7 +18,7 @@ if __name__ == "__main__":
     general_bot_client = BadgerBot(
         github_pat=os.getenv("BADGER_SOURCECRED_PAT_PROD"),
         github_repo="btcookies/SourceCred",
-        discord_id=os.getenv("BOT_ID_GENERAL")
+        discord_id=os.getenv("BOT_ID_GENERAL"),
     )
     loop.create_task(general_bot_client.start(os.getenv("BOT_TOKEN_GENERAL")))
 
