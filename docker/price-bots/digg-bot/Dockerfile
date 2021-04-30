@@ -9,7 +9,7 @@ RUN apk add --no-cache \
         musl-dev \
         gcc \
         make \
-        libffi-dev \
+        libffi-dev
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
@@ -19,5 +19,7 @@ RUN apk del \
         gcc \
         make \
         libffi-dev
+
+COPY . .
 
 CMD [ "python", "scripts/price-bots/run_digg_bot.py" ]

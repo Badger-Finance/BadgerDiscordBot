@@ -9,7 +9,7 @@ RUN apk add --no-cache \
         musl-dev \
         gcc \
         make \
-        libffi-dev \
+        libffi-dev 
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
