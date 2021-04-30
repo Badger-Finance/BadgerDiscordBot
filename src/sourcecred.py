@@ -69,7 +69,9 @@ class SourceCredManager:
             identity_id = self.get_discord_user_identity_id(discord_id)
 
             if identity_id:
-                self.logger.info(f"Found identity_id {identity_id} for user {discord_id}, creating record.")
+                self.logger.info(
+                    f"Found identity_id {identity_id} for user {discord_id}, creating record."
+                )
                 activation_actions.append(self.create_activation_action(identity_id))
                 activated_users.append(discord_id)
             # else:

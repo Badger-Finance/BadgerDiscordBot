@@ -115,7 +115,9 @@ class BadgerBot(discord.Client):
                 description=f"Received registration request for user {message.author.display_name}. "
                 f"Registering user with the following fields.",
             )
-
+            embed.add_field(
+                "Discord", value=f"{message.author.display_name}", inline=False
+            )
             embed.add_field(
                 name="Github", value=f"{github}", inline=False
             ) if github else None
