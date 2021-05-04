@@ -67,10 +67,20 @@ class PriceBot(discord.Client):
             self.logger.info(guild.members)
             for member in guild.members:
                 if str(member.id) == self.discord_id:
-                    await member.edit(
-                        nick=f"{self.token_display} $"
-                        + str(self.token_data.get("token_price_usd"))
-                    )
+                    try:
+                        await member.edit(
+                            nick=f"{self.token_display} $"
+                            + str(self.token_data.get("token_price_usd"))
+                        )
+                    except Exception as e:
+                        self.logger.error("Error updated nickname")
+                        self.logger.error(e)
+                        webhook = discord.Webhook.from_url(os.getenv("DISCORD_MONITORING_WEBHOOK_URL"), adapter=discord.RequestsWebhookAdapter())
+                        embed = discord.Embed(
+                            title=f"**{self.token_display} Price Bot Error**",
+                            description=f"Error message: {e}"
+                        )
+                        webhook.send(embed=embed, username="Price Bot Monitoring")
 
     @update_price.before_loop
     async def before_update_price(self):
