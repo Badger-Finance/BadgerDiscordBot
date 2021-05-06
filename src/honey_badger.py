@@ -59,6 +59,8 @@ class BadgerBot(discord.Client):
         self.logger.info(f"Logged in as {self.user.name} {self.user.id}")
 
     async def on_message(self, message):
+        self.logger.info(f"Message received: {message}")
+        self.logger.info(f"Message channel id: {message.channel.id}")
         if self.user.id != message.author.id:
             if message.content.startswith("!register"):
                 await self.submit_sourcecred_user_registration(message)
@@ -340,8 +342,11 @@ class BadgerBot(discord.Client):
     
     def _is_user_payout_admin(self, user: discord.User) -> bool:
         roles = [role.name for role in user.roles]
+        self.logger.info(f"user roles {roles}")
+        self.logger.info(f"payout admin role {PAYOUT_ADMIN_ROLE_NAME}")
         for role in roles:
             if role == PAYOUT_ADMIN_ROLE_NAME:
+                self.logger.info("user is admin")
                 return True
         
         return False
@@ -361,7 +366,7 @@ class BadgerBot(discord.Client):
         await self.tip_users(users_to_tip)
     
     async def tip_users(self, users: list):
-        channel = self.get_channel(PAYOUT_CHANNEL_ID)
+        channel = self.get_channel(int(PAYOUT_CHANNEL_ID))
         for user in users:
             user_id = user.get("user_id")
             amt = user.get("badger_amt")
