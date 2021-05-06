@@ -13,30 +13,6 @@ load_dotenv()
 
 UPDATE_INTERVAL_SECONDS = 45
 
-UNISWAP_SUBGRAPH = os.getenv("UNISWAP_SUBGRAPH")
-WBTC_USDC_PAIR_ID = os.getenv("WBTC_USDC_PAIR_ID")
-UNISWAP_POOL_QUERY = """
-    query($pairId: String!) {
-        pair(
-            id: $pairId
-        ) {
-            id
-            liquidityProviderCount
-            reserveUSD
-            token0 {
-                name
-            }
-            token0Price
-            token1 {
-                name
-            }
-            token1Price
-            volumeToken0
-            volumeToken1
-            volumeUSD
-        }
-    }
-    """
 BTC_USD_ORACLE_ADDRESS = "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"
 DIGG_BTC_ORACLE_ADDRESS = "0x418a6C98CD5B8275955f08F0b8C1c6838c8b1685"
 
