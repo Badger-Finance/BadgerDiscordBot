@@ -346,7 +346,7 @@ class BadgerBot(discord.Client):
         
         return False
     
-    def payout_kudos(self):
+    async def payout_kudos(self):
         # get ledger
 
         # get latest payout actions
@@ -358,9 +358,9 @@ class BadgerBot(discord.Client):
         ]
 
         # send tip messages to payout users
-        self.tip_users(users_to_tip)
+        await self.tip_users(users_to_tip)
     
-    def tip_users(self, users: list):
+    async def tip_users(self, users: list):
         channel = self.get_channel(PAYOUT_CHANNEL_ID)
         for user in users:
             user_id = user.get("user_id")
