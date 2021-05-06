@@ -109,6 +109,7 @@ class DiggBot(PriceBot):
         }
 
     def _get_digg_wbtc_price(self, retry: bool = False):
+        #TODO: use chainlink oracle to do this
         if retry:
             sleep(2)
 
