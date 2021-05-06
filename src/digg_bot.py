@@ -19,7 +19,6 @@ DIGG_BTC_ORACLE_ADDRESS = "0x418a6C98CD5B8275955f08F0b8C1c6838c8b1685"
 
 class DiggBot(PriceBot):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.digg_oracle_abi = kwargs.get("digg_oracle_abi")
         self.btc_oracle_abi = kwargs.get("btc_oracle_abi")
         self.btc_oracle_contract = self.web3.eth.contract(
@@ -30,8 +29,7 @@ class DiggBot(PriceBot):
             address=self.web3.toChecksumAddress(DIGG_BTC_ORACLE_ADDRESS),
             abi=self.digg_oracle_abi,
         )
-
-        self._get_token_data()
+        super().__init__(*args, **kwargs)
 
     @tasks.loop(seconds=UPDATE_INTERVAL_SECONDS)
     async def update_price(self):
