@@ -21,6 +21,7 @@ logging.basicConfig(
 
 SC_REGISTRATION_TABLE_NAME = os.getenv("SC_REGISTRATION_TABLE_NAME")
 SC_REGISTRATION_QUEUE_NAME = os.getenv("SC_REGISTRATION_QUEUE_NAME")
+PAYOUT_CHANNEL_ID = os.getenv("PAYOUT_CHANNEL_ID")
 REGISTER_POLL_INTERVAL_HOURS = 1
 
 
@@ -61,9 +62,39 @@ class BadgerBot(discord.Client):
             if message.content.startswith("!register"):
                 await self.submit_sourcecred_user_registration(message)
             elif message.content.startswith("!kudos"):
-                await self.submit_sourcecred_user_registration(message)
+                await self.send_kudos_eli5(message)
             elif message.content.startswith("!mention"):
                 await self.mention_user(message)
+
+    # channel = client.get_channel(12324234183172)
+    @tasks.loop(minutes=REGISTER_POLL_INTERVAL_HOURS)
+    async def payout_cred_earners(self):
+        """
+        Asynchronous function that runs every REGISTER_POLL_INTERVAL_HOURS to get all of the
+        current sourcecred registration requests and invoke the SourceCredManager to register
+        the users to the ledger.json
+        """
+        self.logger.info("Checking for outstanding registration requests.")
+        # poll queue to get messages
+        registration_messages = self._get_outstanding_registration_messages()
+
+        # check and make sure not duplicate messages from user, if so only process latest one
+        unique_registrations = self._get_unique_registrations(registration_messages)
+
+        self.logger.info(f"unique registrations received: {unique_registrations}")
+
+        # submit list of discord ids to register on sourcecred
+        discord_ids = [discord_id for discord_id in unique_registrations.keys()]
+        self.logger.info(f"submitting discord_ids {discord_ids}")
+
+        activated_users = self.sc.activate_discord_users(discord_ids)
+
+        # after successful registration, add entry to db for user marking them registered
+        if len(activated_users) > 0:
+            self._mark_users_activated(activated_users, unique_registrations)
+            self.logger.info("Successfully activated following users")
+            self.logger.info(activated_users)
+    
     @tasks.loop(minutes=REGISTER_POLL_INTERVAL_HOURS)
     async def process_outstanding_registration_requests(self):
         """
@@ -295,6 +326,9 @@ class BadgerBot(discord.Client):
         self.logger.info(f"Registered user with data {data}")
     
     async def mention_user(self, message: discord.Message):
-        message_to_user = f"Test mention <@{str(message.author.id)}>"
+        message_to_user = (
+            f"Test mention <@{str(message.author.id)}> your roles are "
+            f"{message.author.roles}"
+        )
         await self.send_user_dm(int(message.author.id), message_to_user)
 
