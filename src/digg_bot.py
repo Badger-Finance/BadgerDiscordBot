@@ -94,14 +94,14 @@ class DiggBot(PriceBot):
     def _get_digg_btc_price(self) -> Decimal:
 
         return Decimal(
-            self.digg_oracle_contract.functions.latestRoundData.call()[1] 
+            self.digg_oracle_contract.functions.latestRoundData().call()[1] 
             / 10 ** 8
         )
 
     def _get_btc_usd_price(self) -> Decimal:
 
         return Decimal(
-            self.btc_oracle_contract.functions.latestRoundData.call()[1] 
+            self.btc_oracle_contract.functions.latestRoundData().call()[1] 
             / 10 ** 8
         )
 
