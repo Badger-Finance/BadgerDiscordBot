@@ -326,9 +326,10 @@ class BadgerBot(discord.Client):
         self.logger.info(f"Registered user with data {data}")
     
     async def mention_user(self, message: discord.Message):
+        roles = [role.name for role in message.author.roles]
         message_to_user = (
             f"Test mention <@{str(message.author.id)}> your roles are "
-            f"{message.author.roles}"
+            f"{roles}"
         )
         await self.send_user_dm(int(message.author.id), message_to_user)
 
