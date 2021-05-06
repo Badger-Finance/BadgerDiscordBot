@@ -118,8 +118,11 @@ class DiggBot(PriceBot):
             UNISWAP_SUBGRAPH,
             json={"query": UNISWAP_POOL_QUERY, "variables": variables},
         )
-
-        self.logger.info(f"digg_wbtc_price: {request.json()}")
+        try:
+            self.logger.info(f"digg_wbtc_price: {request.json()}")
+        except json.decoder.JSONDecodeError as e:
+            self.logger.error(f"Error getting json {e}")
+            self._get_digg_wbtc_price(retry=True)
 
         return (
             self._get_digg_wbtc_price(retry=True)
