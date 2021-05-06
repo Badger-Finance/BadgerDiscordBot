@@ -22,6 +22,7 @@ logging.basicConfig(
 SC_REGISTRATION_TABLE_NAME = os.getenv("SC_REGISTRATION_TABLE_NAME")
 SC_REGISTRATION_QUEUE_NAME = os.getenv("SC_REGISTRATION_QUEUE_NAME")
 PAYOUT_CHANNEL_ID = os.getenv("PAYOUT_CHANNEL_ID")
+PAYOUT_ADMIN_ROLE_NAME = os.getenv("PAYOUT_ADMIN_ROLE_NAME")
 REGISTER_POLL_INTERVAL_HOURS = 1
 
 
@@ -63,8 +64,12 @@ class BadgerBot(discord.Client):
                 await self.submit_sourcecred_user_registration(message)
             elif message.content.startswith("!kudos"):
                 await self.send_kudos_eli5(message)
-            elif message.content.startswith("!mention"):
-                await self.mention_user(message)
+            elif (
+                message.content.startswith("!payout") 
+                and message.channel.id == int(PAYOUT_CHANNEL_ID)
+                and self._is_user_payout_admin(message.author)
+            ):
+                await self.payout_kudos()
 
     # channel = client.get_channel(12324234183172)
     @tasks.loop(minutes=REGISTER_POLL_INTERVAL_HOURS)
@@ -332,4 +337,34 @@ class BadgerBot(discord.Client):
             f"{roles}"
         )
         await self.send_user_dm(int(message.author.id), message_to_user)
+    
+    def _is_user_payout_admin(self, user: discord.User) -> bool:
+        roles = [role.name for role in user.roles]
+        for role in roles:
+            if role == PAYOUT_ADMIN_ROLE_NAME:
+                return True
+        
+        return False
+    
+    def payout_kudos(self):
+        # get ledger
+
+        # get latest payout actions
+        users_to_tip = [
+            {
+                "user_id": os.getenv("TEST_USER_ID"),
+                "badger_amt": 1
+            }
+        ]
+
+        # send tip messages to payout users
+        self.tip_users(users_to_tip)
+    
+    def tip_users(self, users: list):
+        channel = self.get_channel(PAYOUT_CHANNEL_ID)
+        for user in users:
+            user_id = user.get("user_id")
+            amt = user.get("badger_amt")
+            await channel.send(f"$tip <@{user_id}> {amt} ants")
+
 
