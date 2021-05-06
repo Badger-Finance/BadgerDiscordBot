@@ -37,11 +37,23 @@ UNISWAP_POOL_QUERY = """
         }
     }
     """
+BTC_USD_ORACLE_ADDRESS = "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"
+DIGG_BTC_ORACLE_ADDRESS = "0x418a6C98CD5B8275955f08F0b8C1c6838c8b1685"
 
 
 class DiggBot(PriceBot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.digg_oracle_abi = kwargs.get("digg_oracle_abi")
+        self.btc_oracle_abi = kwargs.get("btc_oracle_abi")
+        self.btc_oracle_contract = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(BTC_USD_ORACLE_ADDRESS),
+            abi=self.btc_oracle_abi,
+        )
+        self.digg_oracle_contract = self.web3.eth.contract(
+            address=self.web3.toChecksumAddress(DIGG_BTC_ORACLE_ADDRESS),
+            abi=self.digg_oracle_abi,
+        )
 
         self._get_token_data()
 
@@ -93,13 +105,9 @@ class DiggBot(PriceBot):
         Private function to make call to thegraph to retrieve price and market cap for the token and update
         token data property.
         """
-        response = self.session.get(
-            f"https://api.coingecko.com/api/v3/coins/{self.coingecko_token_id}"
-        ).content
-        token_data = json.loads(response)
 
-        token_price_btc = self._get_digg_wbtc_price()
-        token_price_usd = token_price_btc * self._get_wbtc_usdc_price()
+        token_price_btc = self._get_digg_btc_price()
+        token_price_usd = token_price_btc * self._get_btc_usd_price()
         market_cap = token_price_usd * Decimal(self._get_supply())
 
         self.token_data = {
@@ -108,41 +116,19 @@ class DiggBot(PriceBot):
             "market_cap": market_cap,
         }
 
-    def _get_digg_wbtc_price(self, retry: bool = False):
-        #TODO: use chainlink oracle to do this
-        if retry:
-            sleep(2)
+    def _get_digg_btc_price(self) -> Decimal:
 
-        variables = {"pairId": os.getenv("WBTC_DIGG_PAIR_ID")}
-
-        request = self.session.post(
-            UNISWAP_SUBGRAPH,
-            json={"query": UNISWAP_POOL_QUERY, "variables": variables},
-        )
-        try:
-            self.logger.info(f"digg_wbtc_price: {request.json()}")
-        except json.decoder.JSONDecodeError as e:
-            self.logger.error(f"Error getting json {e}")
-            self._get_digg_wbtc_price(retry=True)
-
-        return (
-            self._get_digg_wbtc_price(retry=True)
-            if request.json().get("data", {}).get("pair") == None
-            else Decimal(request.json().get("data").get("pair").get("token0Price"))
+        return Decimal(
+            self.digg_oracle_contract.functions.latestRoundData.call()[1] 
+            / 10 ** 8
         )
 
-    def _get_wbtc_usdc_price(self) -> Decimal:
+    def _get_btc_usd_price(self) -> Decimal:
 
-        variables = {"pairId": WBTC_USDC_PAIR_ID}
-
-        request = self.session.post(
-            UNISWAP_SUBGRAPH,
-            json={"query": UNISWAP_POOL_QUERY, "variables": variables},
+        return Decimal(
+            self.btc_oracle_contract.functions.latestRoundData.call()[1] 
+            / 10 ** 8
         )
-
-        self.logger.info(f"wbtc_usdc_price: {request.json()}")
-
-        return Decimal(request.json()["data"]["pair"]["token1Price"])
 
     def _get_supply(self):
         supply = (
