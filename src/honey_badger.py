@@ -60,7 +60,10 @@ class BadgerBot(discord.Client):
         if self.user.id != message.author.id:
             if message.content.startswith("!register"):
                 await self.submit_sourcecred_user_registration(message)
-
+            elif message.content.startswith("!kudos"):
+                await self.submit_sourcecred_user_registration(message)
+            elif message.content.startswith("!mention"):
+                await self.mention_user(message)
     @tasks.loop(minutes=REGISTER_POLL_INTERVAL_HOURS)
     async def process_outstanding_registration_requests(self):
         """
@@ -290,3 +293,8 @@ class BadgerBot(discord.Client):
             UpdateExpression="SET #G=:g, #DS=:ds, #W=:w, #DD=:dd",
         )
         self.logger.info(f"Registered user with data {data}")
+    
+    async def mention_user(self, message: discord.Message):
+        message_to_user = f"Test mention <@{str(message.author.id)}>"
+        await self.send_user_dm(int(message.author.id), message_to_user)
+
