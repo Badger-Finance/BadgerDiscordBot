@@ -358,7 +358,7 @@ class BadgerBot(discord.Client):
         users_to_tip = [
             {
                 "user_id": os.getenv("TEST_USER_ID"),
-                "badger_amt": 1
+                "badger_amt": "all"
             }
         ]
 
